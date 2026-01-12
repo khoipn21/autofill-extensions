@@ -65,7 +65,3 @@ bun run lint
 - `activeTab`: Access current tab for form detection
 - `scripting`: Inject content scripts
 - `tabs`: Capture screenshots
-
-## License
-
-Private - Daun Internal Use Only
