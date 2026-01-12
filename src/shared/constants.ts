@@ -1,49 +1,127 @@
-import type { AvailableModel, FieldType } from './types';
+import type { AvailableModel, FieldType, AIProvider, ProviderProfile } from './types';
 
-// OpenRouter API
+// API URLs
 export const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+export const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
-// Default model - using free vision model
-export const DEFAULT_MODEL = 'google/gemini-2.0-flash-exp:free';
+// Default models per provider
+export const DEFAULT_OPENROUTER_MODEL = 'google/gemini-2.0-flash-exp:free';
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+export const DEFAULT_MODEL = DEFAULT_OPENROUTER_MODEL; // Legacy
+
+// Provider display info
+export const PROVIDER_INFO: Record<AIProvider, { name: string; description: string; keyPrefix: string }> = {
+  openrouter: {
+    name: 'OpenRouter',
+    description: 'Multi-model gateway (access Gemini, GPT-4o, Claude via one API)',
+    keyPrefix: 'sk-or-',
+  },
+  gemini: {
+    name: 'Gemini (Google AI Studio)',
+    description: 'Direct access to Google Gemini models',
+    keyPrefix: 'AIza',
+  },
+};
 
 // Available models (vision-capable models listed first)
 export const AVAILABLE_MODELS: AvailableModel[] = [
+  // OpenRouter models
   {
     id: 'google/gemini-2.0-flash-exp:free',
     name: 'Gemini 2.0 Flash Exp (Free, Vision)',
     cost: 'Free',
     recommended: true,
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'allenai/molmo-2-8b:free',
     name: 'Molmo 2 8B (Free, Vision)',
     cost: 'Free',
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'nvidia/nemotron-nano-12b-v2-vl:free',
     name: 'Nemotron VL (Free, Vision)',
     cost: 'Free',
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'mistralai/devstral-2512:free',
     name: 'Devstral (Free, Text-only)',
     cost: 'Free',
     supportsVision: false,
+    provider: 'openrouter',
   },
   {
     id: 'google/gemini-2.0-flash-001',
     name: 'Gemini 2.0 Flash (Vision)',
     cost: '$0.10/1M tokens',
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'openai/gpt-4o-mini',
     name: 'GPT-4o Mini (Vision)',
     cost: '$0.15/1M tokens',
     supportsVision: true,
+    provider: 'openrouter',
+  },
+  // Gemini (Google AI Studio) models
+  // Gemini 3 models
+  {
+    id: 'gemini-3-pro-preview',
+    name: 'Gemini 3 Pro (Preview)',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  {
+    id: 'gemini-3-flash-preview',
+    name: 'Gemini 3 Flash (Preview)',
+    cost: 'Free tier available',
+    recommended: true,
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  // Gemini 2.5 models
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  {
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  {
+    id: 'gemini-2.5-flash-lite',
+    name: 'Gemini 2.5 Flash Lite',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  // Gemini 2.0 models
+  {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
+  },
+  {
+    id: 'gemini-2.0-flash-lite',
+    name: 'Gemini 2.0 Flash Lite',
+    cost: 'Free tier available',
+    supportsVision: true,
+    provider: 'gemini',
   },
 ];
 
@@ -61,18 +139,43 @@ export const DEFAULT_ENABLED_FIELD_TYPES: FieldType[] = [
   'dynamic',
 ];
 
+// Default provider profiles
+export const DEFAULT_PROVIDER_PROFILES: Record<AIProvider, ProviderProfile> = {
+  openrouter: {
+    apiKey: '',
+    apiKeys: [],
+    primaryApiKeyId: undefined,
+    model: DEFAULT_OPENROUTER_MODEL,
+    customModels: [],
+  },
+  gemini: {
+    apiKey: '',
+    apiKeys: [],
+    primaryApiKeyId: undefined,
+    model: DEFAULT_GEMINI_MODEL,
+    customModels: [],
+  },
+};
+
 // Default settings
 export const DEFAULT_SETTINGS = {
+  // Provider settings
+  activeProvider: 'openrouter' as AIProvider,
+  providers: DEFAULT_PROVIDER_PROFILES,
+
+  // Legacy fields (backward compatible - will be synced with providers.openrouter)
   apiKey: '',
   apiKeys: [] as { id: string; key: string; name?: string; addedAt: number }[],
   primaryApiKeyId: undefined as string | undefined,
   model: DEFAULT_MODEL,
+  customModels: [] as { id: string; name?: string; addedAt: number }[],
+
+  // Global settings
   enabled: true,
   enabledFieldTypes: DEFAULT_ENABLED_FIELD_TYPES,
   enableVisionRecheck: false, // Disabled by default to save API tokens
   targetLanguage: 'kr' as const, // Korean by default
   debugMode: false, // Streaming debug mode disabled by default
-  customModels: [] as { id: string; name?: string; addedAt: number }[], // User-saved custom models
   customDomains: [] as string[], // Additional whitelisted domains
   maxFillRounds: 3, // Default max fill rounds
   promptTemplates: [] as { id: string; name: string; prompt: string; createdAt: number; updatedAt: number }[],
@@ -83,14 +186,6 @@ export const DEFAULT_SETTINGS = {
 export const DEFAULT_ALLOWED_DOMAINS = [
   'localhost',
   '127.0.0.1',
-  'daun.kr',
-  'daun-dev.kr',
-  'daun-stg.kr',
-  'admin.daun.kr',
-  'stg.daun.kr',
-  'dev.daun.kr',
-  'daun-cms.axndx.org',
-  'daun.axndx.org',
 ];
 
 // Default system prompt (displayed in settings, actual prompt is in ai-service.ts)

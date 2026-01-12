@@ -84,11 +84,23 @@ export interface FormAnalysis {
 // AI fill result (field id to value mapping)
 export type AIFillResult = Record<string, string>;
 
+// AI provider types
+export type AIProvider = 'openrouter' | 'gemini';
+
 // Custom model saved by user
 export interface CustomModel {
   id: string;
   name?: string; // Optional friendly name
   addedAt: number; // Timestamp
+}
+
+// Provider-specific profile (API keys and settings per provider)
+export interface ProviderProfile {
+  apiKey: string; // Primary API key
+  apiKeys: ApiKeyEntry[]; // Multiple API keys for fallback
+  primaryApiKeyId?: string; // ID of primary key
+  model: string; // Selected model for this provider
+  customModels: CustomModel[]; // User-saved custom models for this provider
 }
 
 // API Key entry for multi-key support
@@ -110,16 +122,23 @@ export interface PromptTemplate {
 
 // Extension settings
 export interface ExtensionSettings {
+  // Provider selection
+  activeProvider: AIProvider; // Currently active provider
+  providers: Record<AIProvider, ProviderProfile>; // Provider-specific profiles
+
+  // Legacy fields (backward compatibility - mapped from providers.openrouter)
   apiKey: string; // Primary API key (backward compatible)
   apiKeys?: ApiKeyEntry[]; // Multiple API keys
   primaryApiKeyId?: string; // ID of primary key
   model: string;
+  customModels?: CustomModel[]; // User-saved custom models
+
+  // Global settings (shared across providers)
   enabled: boolean;
   enabledFieldTypes?: FieldType[]; // Field types to auto-fill
   enableVisionRecheck?: boolean; // Use vision (screenshot) for second round verification
   targetLanguage?: 'kr' | 'en'; // Site language for STG debugging
   debugMode?: boolean; // Enable streaming AI output for debugging
-  customModels?: CustomModel[]; // User-saved custom models
   customDomains?: string[]; // Additional domains to enable extension on
   maxFillRounds?: number; // Max rounds for autofill retry (default: 3)
   promptTemplates?: PromptTemplate[]; // Saved prompt templates
@@ -133,4 +152,5 @@ export interface AvailableModel {
   cost: string;
   recommended?: boolean;
   supportsVision?: boolean; // Whether model can accept image inputs
+  provider: AIProvider; // Which provider this model belongs to
 }

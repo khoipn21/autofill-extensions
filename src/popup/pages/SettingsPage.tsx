@@ -1,100 +1,147 @@
-import { useState } from 'react';
-import { ArrowLeft, Save, Trash2, Eye, Globe, Bug, Power, RotateCcw } from 'lucide-react';
-import { ApiKeyManager } from '../components/ApiKeyManager';
-import { DomainManager } from '../components/DomainManager';
-import { PromptTemplateManager } from '../components/PromptTemplateManager';
-import { ModelSelector } from '../components/ModelSelector';
-import { FieldTypeSelector } from '../components/FieldTypeSelector';
-import { usePopupStore } from '../store';
-import type { FieldType, CustomModel, ApiKeyEntry, PromptTemplate } from '@/shared/types';
-import { DEFAULT_ENABLED_FIELD_TYPES } from '@/shared/constants';
+import {
+  DEFAULT_ENABLED_FIELD_TYPES,
+  DEFAULT_PROVIDER_PROFILES,
+} from "@/shared/constants";
+import type {
+  AIProvider,
+  CustomModel,
+  FieldType,
+  PromptTemplate,
+  ProviderProfile,
+} from "@/shared/types";
+import {
+  ArrowLeft,
+  Bug,
+  Eye,
+  Globe,
+  Power,
+  RotateCcw,
+  Save,
+  Trash2,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { ApiKeyManager } from "../components/ApiKeyManager";
+import { DomainManager } from "../components/DomainManager";
+import { FieldTypeSelector } from "../components/FieldTypeSelector";
+import { ModelSelector } from "../components/ModelSelector";
+import { PromptTemplateManager } from "../components/PromptTemplateManager";
+import { ProviderSelector } from "../components/ProviderSelector";
+import { usePopupStore } from "../store";
 
 export function SettingsPage() {
   const { settings, updateSettings, setPage, loading } = usePopupStore();
 
-  // Existing settings
-  const [apiKey, setApiKey] = useState(settings.apiKey);
-  const [model, setModel] = useState(settings.model);
+  // Provider selection
+  const [activeProvider, setActiveProvider] = useState<AIProvider>(
+    settings.activeProvider || "openrouter"
+  );
+  const [providers, setProviders] = useState(
+    settings.providers || DEFAULT_PROVIDER_PROFILES
+  );
+
+  // Global settings
+  const [enabled, setEnabled] = useState(settings.enabled ?? true);
   const [enabledFieldTypes, setEnabledFieldTypes] = useState<FieldType[]>(
     settings.enabledFieldTypes || DEFAULT_ENABLED_FIELD_TYPES
   );
   const [enableVisionRecheck, setEnableVisionRecheck] = useState(
     settings.enableVisionRecheck ?? false
   );
-  const [targetLanguage, setTargetLanguage] = useState<'kr' | 'en'>(
-    settings.targetLanguage ?? 'kr'
+  const [targetLanguage, setTargetLanguage] = useState<"kr" | "en">(
+    settings.targetLanguage ?? "kr"
   );
   const [debugMode, setDebugMode] = useState(settings.debugMode ?? false);
-  const [customModels, setCustomModels] = useState<CustomModel[]>(settings.customModels ?? []);
-
-  // New settings
-  const [enabled, setEnabled] = useState(settings.enabled ?? true);
-  const [apiKeys, setApiKeys] = useState<ApiKeyEntry[]>(settings.apiKeys ?? []);
-  const [primaryApiKeyId, setPrimaryApiKeyId] = useState<string | undefined>(
-    settings.primaryApiKeyId
+  const [customDomains, setCustomDomains] = useState<string[]>(
+    settings.customDomains ?? []
   );
-  const [customDomains, setCustomDomains] = useState<string[]>(settings.customDomains ?? []);
-  const [maxFillRounds, setMaxFillRounds] = useState(settings.maxFillRounds ?? 3);
+  const [maxFillRounds, setMaxFillRounds] = useState(
+    settings.maxFillRounds ?? 3
+  );
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>(
     settings.promptTemplates ?? []
   );
-  const [activePromptTemplateId, setActivePromptTemplateId] = useState<string | null>(
-    settings.activePromptTemplateId ?? null
+  const [activePromptTemplateId, setActivePromptTemplateId] = useState<
+    string | null
+  >(settings.activePromptTemplateId ?? null);
+
+  // Current provider profile (derived from providers state)
+  const currentProfile = useMemo(
+    () => providers[activeProvider],
+    [providers, activeProvider]
   );
+
+  // Handlers for provider profile updates
+  const updateCurrentProviderProfile = (updates: Partial<ProviderProfile>) => {
+    setProviders((prev) => ({
+      ...prev,
+      [activeProvider]: { ...prev[activeProvider], ...updates },
+    }));
+  };
+
+  const handleProviderChange = (provider: AIProvider) => {
+    setActiveProvider(provider);
+  };
 
   const handleSave = async () => {
     await updateSettings({
-      apiKey,
-      model,
+      activeProvider,
+      providers,
+      enabled,
       enabledFieldTypes,
       enableVisionRecheck,
       targetLanguage,
       debugMode,
-      customModels,
-      enabled,
-      apiKeys,
-      primaryApiKeyId,
       customDomains,
       maxFillRounds,
       promptTemplates,
       activePromptTemplateId,
     });
-    setPage('main');
+    setPage("main");
   };
 
-  const handleSaveCustomModel = (newModel: CustomModel) => {
-    const updated = [...customModels, newModel];
-    setCustomModels(updated);
-    updateSettings({ customModels: updated });
+  const handleSaveCustomModel = (modelId: string) => {
+    const newModel: CustomModel = { id: modelId, addedAt: Date.now() };
+    const updated = [...(currentProfile.customModels || []), newModel];
+    updateCurrentProviderProfile({ customModels: updated });
   };
 
   const handleDeleteCustomModel = (modelId: string) => {
-    const updated = customModels.filter((m) => m.id !== modelId);
-    setCustomModels(updated);
-    updateSettings({ customModels: updated });
+    const updated = (currentProfile.customModels || []).filter(
+      (m) => m.id !== modelId
+    );
+    updateCurrentProviderProfile({ customModels: updated });
   };
 
   const handleClear = async () => {
-    if (confirm('Clear API key and reset settings?')) {
-      await updateSettings({ apiKey: '', apiKeys: [], primaryApiKeyId: undefined });
-      setPage('setup');
+    if (confirm("Clear all API keys and reset settings?")) {
+      await updateSettings({
+        activeProvider: "openrouter",
+        providers: DEFAULT_PROVIDER_PROFILES,
+        apiKey: "",
+        apiKeys: [],
+        primaryApiKeyId: undefined,
+      });
+      setPage("setup");
     }
   };
 
   // Change site language via injected script
-  const handleLanguageChange = async (lang: 'kr' | 'en') => {
+  const handleLanguageChange = async (lang: "kr" | "en") => {
     setTargetLanguage(lang);
 
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       if (tab?.id) {
         await chrome.tabs.sendMessage(tab.id, {
-          type: 'CHANGE_LANGUAGE',
+          type: "CHANGE_LANGUAGE",
           payload: { language: lang },
         });
       }
     } catch (err) {
-      console.warn('Failed to change language:', err);
+      console.warn("Failed to change language:", err);
     }
   };
 
@@ -102,7 +149,7 @@ export function SettingsPage() {
     <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setPage('main')}
+          onClick={() => setPage("main")}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5 text-gray-500" />
@@ -121,46 +168,68 @@ export function SettingsPage() {
             <button
               onClick={() => setEnabled(!enabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                enabled ? 'bg-green-500' : 'bg-gray-300'
+                enabled ? "bg-green-500" : "bg-gray-300"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  enabled ? 'translate-x-6' : 'translate-x-1'
+                  enabled ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
           <p className="text-xs text-gray-500">
-            {enabled ? 'Extension is active on allowed domains' : 'Extension is disabled globally'}
+            {enabled
+              ? "Extension is active on allowed domains"
+              : "Extension is disabled globally"}
           </p>
         </div>
 
-        {/* API Key Manager */}
+        {/* Provider Selector */}
+        <ProviderSelector
+          activeProvider={activeProvider}
+          onProviderChange={handleProviderChange}
+        />
+
+        {/* API Key Manager - Provider Specific */}
         <ApiKeyManager
-          apiKey={apiKey}
-          apiKeys={apiKeys}
-          primaryApiKeyId={primaryApiKeyId}
-          onApiKeyChange={setApiKey}
-          onApiKeysChange={setApiKeys}
-          onPrimaryChange={setPrimaryApiKeyId}
+          provider={activeProvider}
+          apiKey={currentProfile.apiKey}
+          apiKeys={currentProfile.apiKeys || []}
+          primaryApiKeyId={currentProfile.primaryApiKeyId}
+          onApiKeyChange={(key) =>
+            updateCurrentProviderProfile({ apiKey: key })
+          }
+          onApiKeysChange={(keys) =>
+            updateCurrentProviderProfile({ apiKeys: keys })
+          }
+          onPrimaryChange={(id) =>
+            updateCurrentProviderProfile({ primaryApiKeyId: id })
+          }
           loading={loading}
         />
 
-        {/* Domain Manager */}
-        <DomainManager customDomains={customDomains} onChange={setCustomDomains} />
-
-        {/* Model Selector */}
+        {/* Model Selector - Provider Specific */}
         <ModelSelector
-          value={model}
-          onChange={setModel}
-          customModels={customModels}
+          value={currentProfile.model}
+          onChange={(model) => updateCurrentProviderProfile({ model })}
+          provider={activeProvider}
+          customModels={currentProfile.customModels || []}
           onSaveCustomModel={handleSaveCustomModel}
           onDeleteCustomModel={handleDeleteCustomModel}
         />
 
+        {/* Domain Manager */}
+        <DomainManager
+          customDomains={customDomains}
+          onChange={setCustomDomains}
+        />
+
         {/* Field Type Selector */}
-        <FieldTypeSelector value={enabledFieldTypes} onChange={setEnabledFieldTypes} />
+        <FieldTypeSelector
+          value={enabledFieldTypes}
+          onChange={setEnabledFieldTypes}
+        />
 
         {/* Max Fill Rounds */}
         <div className="space-y-2">
@@ -175,7 +244,11 @@ export function SettingsPage() {
                 min={1}
                 max={10}
                 value={maxFillRounds}
-                onChange={(e) => setMaxFillRounds(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
+                onChange={(e) =>
+                  setMaxFillRounds(
+                    Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
+                  )
+                }
                 className="w-16 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -195,19 +268,19 @@ export function SettingsPage() {
             <button
               onClick={() => setEnableVisionRecheck(!enableVisionRecheck)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                enableVisionRecheck ? 'bg-primary' : 'bg-gray-300'
+                enableVisionRecheck ? "bg-primary" : "bg-gray-300"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  enableVisionRecheck ? 'translate-x-6' : 'translate-x-1'
+                  enableVisionRecheck ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
           <p className="text-xs text-gray-500">
-            Use full-page screenshot for second round to visually verify unfilled fields (uses more
-            API tokens)
+            Use full-page screenshot for second round to visually verify
+            unfilled fields (uses more API tokens)
           </p>
         </div>
 
@@ -227,21 +300,21 @@ export function SettingsPage() {
           </label>
           <div className="flex gap-2">
             <button
-              onClick={() => handleLanguageChange('kr')}
+              onClick={() => handleLanguageChange("kr")}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                targetLanguage === 'kr'
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                targetLanguage === "kr"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               Korean
             </button>
             <button
-              onClick={() => handleLanguageChange('en')}
+              onClick={() => handleLanguageChange("en")}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                targetLanguage === 'en'
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                targetLanguage === "en"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               English
@@ -262,12 +335,12 @@ export function SettingsPage() {
             <button
               onClick={() => setDebugMode(!debugMode)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                debugMode ? 'bg-orange-500' : 'bg-gray-300'
+                debugMode ? "bg-orange-500" : "bg-gray-300"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  debugMode ? 'translate-x-6' : 'translate-x-1'
+                  debugMode ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>

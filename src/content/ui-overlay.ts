@@ -1,10 +1,10 @@
 import { logger } from '@/utils/logger';
 
-const OVERLAY_ID = 'daun-autofill-overlay';
-const BUTTON_ID = 'daun-autofill-fab';
-const LANG_BUTTON_ID = 'daun-lang-switcher';
-const DEBUG_PANEL_ID = 'daun-debug-panel';
-const CANCEL_BUTTON_ID = 'daun-cancel-btn';
+const OVERLAY_ID = 'ai-autofill-overlay';
+const BUTTON_ID = 'ai-autofill-fab';
+const LANG_BUTTON_ID = 'ai-lang-switcher';
+const DEBUG_PANEL_ID = 'ai-debug-panel';
+const CANCEL_BUTTON_ID = 'ai-cancel-btn';
 
 interface OverlayState {
   isLoading: boolean;
@@ -70,7 +70,7 @@ function showCancelButton(): void {
 
   const cancelBtn = document.createElement('button');
   cancelBtn.id = CANCEL_BUTTON_ID;
-  cancelBtn.className = 'daun-cancel-btn';
+  cancelBtn.className = 'ai-cancel-btn';
   cancelBtn.innerHTML = '✕ Cancel';
   cancelBtn.addEventListener('click', handleCancelClick);
   container.appendChild(cancelBtn);
@@ -121,7 +121,7 @@ function createOverlayContainer(): HTMLDivElement {
   // Auto-fill FAB button
   const button = document.createElement('button');
   button.id = BUTTON_ID;
-  button.className = 'daun-fab';
+  button.className = 'ai-fab';
   button.setAttribute('data-tooltip', 'Auto-Fill Form (Alt+F)');
   button.innerHTML = getFabIcon();
   button.addEventListener('click', handleFabClick);
@@ -130,7 +130,7 @@ function createOverlayContainer(): HTMLDivElement {
   // Language switcher button
   const langButton = document.createElement('button');
   langButton.id = LANG_BUTTON_ID;
-  langButton.className = 'daun-lang-btn';
+  langButton.className = 'ai-lang-btn';
   langButton.innerHTML = getLangIcon();
   langButton.addEventListener('click', handleLangClick);
   container.appendChild(langButton);
@@ -216,11 +216,11 @@ export function showDebugPanel(): void {
 
   const panel = document.createElement('div');
   panel.id = DEBUG_PANEL_ID;
-  panel.className = 'daun-debug-panel';
+  panel.className = 'ai-debug-panel';
   panel.innerHTML = `
     <div class="debug-header">
       <span>🔍 AI Stream Debug</span>
-      <button class="debug-close" onclick="this.closest('.daun-debug-panel').remove()">×</button>
+      <button class="debug-close" onclick="this.closest('.ai-debug-panel').remove()">×</button>
     </div>
     <div class="debug-content"></div>
   `;
@@ -286,7 +286,7 @@ function getOverlayStyles(): string {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    .daun-fab {
+    .ai-fab {
       position: fixed;
       bottom: 24px;
       right: 24px;
@@ -304,16 +304,16 @@ function getOverlayStyles(): string {
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .daun-fab:hover {
+    .ai-fab:hover {
       transform: scale(1.05);
       box-shadow: 0 6px 16px rgba(34, 139, 230, 0.5);
     }
 
-    .daun-fab:active {
+    .ai-fab:active {
       transform: scale(0.95);
     }
 
-    .daun-fab::before {
+    .ai-fab::before {
       content: attr(data-tooltip);
       position: absolute;
       right: calc(100% + 12px);
@@ -330,7 +330,7 @@ function getOverlayStyles(): string {
       transition: opacity 0.2s, visibility 0.2s;
     }
 
-    .daun-fab:hover::before {
+    .ai-fab:hover::before {
       opacity: 1;
       visibility: visible;
     }
@@ -345,11 +345,11 @@ function getOverlayStyles(): string {
       animation: spin 1s linear infinite;
     }
 
-    .daun-fab.loading .fab-icon {
+    .ai-fab.loading .fab-icon {
       display: none;
     }
 
-    .daun-fab.loading .fab-spinner {
+    .ai-fab.loading .fab-spinner {
       display: block;
     }
 
@@ -359,7 +359,7 @@ function getOverlayStyles(): string {
     }
 
     /* Language switcher button */
-    .daun-lang-btn {
+    .ai-lang-btn {
       position: fixed;
       bottom: 90px;
       right: 32px;
@@ -376,13 +376,13 @@ function getOverlayStyles(): string {
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
 
-    .daun-lang-btn:hover {
+    .ai-lang-btn:hover {
       transform: scale(1.1);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       border-color: #228be6;
     }
 
-    .daun-lang-btn:active {
+    .ai-lang-btn:active {
       transform: scale(0.95);
     }
 
@@ -392,7 +392,7 @@ function getOverlayStyles(): string {
     }
 
     /* Cancel button */
-    .daun-cancel-btn {
+    .ai-cancel-btn {
       position: fixed;
       bottom: 90px;
       right: 90px;
@@ -409,13 +409,13 @@ function getOverlayStyles(): string {
       animation: fadeIn 0.2s ease;
     }
 
-    .daun-cancel-btn:hover {
+    .ai-cancel-btn:hover {
       background: #e03131;
       transform: scale(1.05);
       box-shadow: 0 4px 12px rgba(250, 82, 82, 0.5);
     }
 
-    .daun-cancel-btn:active {
+    .ai-cancel-btn:active {
       transform: scale(0.95);
     }
 
@@ -425,7 +425,7 @@ function getOverlayStyles(): string {
     }
 
     /* Toast notification */
-    .daun-toast {
+    .ai-toast {
       position: fixed;
       bottom: 140px;
       right: 24px;
@@ -441,11 +441,11 @@ function getOverlayStyles(): string {
       max-width: 280px;
     }
 
-    .daun-toast.success {
+    .ai-toast.success {
       border-left: 4px solid #40c057;
     }
 
-    .daun-toast.error {
+    .ai-toast.error {
       border-left: 4px solid #fa5252;
     }
 
@@ -461,7 +461,7 @@ function getOverlayStyles(): string {
     }
 
     /* Debug panel for streaming AI output */
-    .daun-debug-panel {
+    .ai-debug-panel {
       position: fixed;
       bottom: 100px;
       right: 100px;
@@ -530,11 +530,11 @@ function getOverlayStyles(): string {
  * Show toast notification
  */
 export function showToast(message: string, type: 'success' | 'error' = 'success'): void {
-  const existing = document.querySelector('.daun-toast');
+  const existing = document.querySelector('.ai-toast');
   if (existing) existing.remove();
 
   const toast = document.createElement('div');
-  toast.className = `daun-toast ${type}`;
+  toast.className = `ai-toast ${type}`;
 
   const icon =
     type === 'success'

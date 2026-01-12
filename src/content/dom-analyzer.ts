@@ -406,7 +406,7 @@ function findPopupTrigger(element: HTMLElement): HTMLElement | null {
     return element;
   }
 
-  // Check parent LabelInput container (Daun Admin pattern)
+  // Check parent LabelInput container (common admin pattern)
   const labelInput = element.closest('.mantine-InputWrapper-root, [data-label-input]');
   if (labelInput) {
     // Check if container has onClick

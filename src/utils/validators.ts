@@ -1,9 +1,40 @@
+import type { AIProvider } from '@/shared/types';
+
 /**
  * Validate OpenRouter API key format
  */
-export function isValidApiKey(key: string): boolean {
+export function isValidOpenRouterApiKey(key: string): boolean {
   // OpenRouter keys start with sk-or-
   return key.startsWith('sk-or-') && key.length > 20;
+}
+
+/**
+ * Validate Gemini (Google AI Studio) API key format
+ */
+export function isValidGeminiApiKey(key: string): boolean {
+  // Gemini API keys start with AIza and are 39 characters
+  return key.startsWith('AIza') && key.length >= 35;
+}
+
+/**
+ * Validate API key for a specific provider
+ */
+export function isValidApiKeyForProvider(key: string, provider: AIProvider): boolean {
+  switch (provider) {
+    case 'gemini':
+      return isValidGeminiApiKey(key);
+    case 'openrouter':
+    default:
+      return isValidOpenRouterApiKey(key);
+  }
+}
+
+/**
+ * Legacy validator - validates OpenRouter keys by default
+ * @deprecated Use isValidApiKeyForProvider instead
+ */
+export function isValidApiKey(key: string): boolean {
+  return isValidOpenRouterApiKey(key);
 }
 
 /**
@@ -33,9 +64,9 @@ export function isAllowedUrl(
 }
 
 /**
- * Check if URL is a Daun Admin page (backward compatible)
+ * Check if URL is valid (backward compatible)
  * @deprecated Use isAllowedUrl with settings instead
  */
-export function isDaunAdminUrl(url: string): boolean {
+export function isValidUrl(url: string): boolean {
   return isAllowedUrl(url, [], true);
 }

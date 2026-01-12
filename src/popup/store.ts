@@ -25,7 +25,10 @@ export const usePopupStore = create<PopupState>((set) => ({
     set({ loading: true, error: null });
     try {
       const settings = await getSettings();
-      const hasKey = Boolean(settings.apiKey);
+      // Check if active provider has an API key configured
+      const activeProvider = settings.activeProvider || 'openrouter';
+      const providerProfile = settings.providers?.[activeProvider];
+      const hasKey = Boolean(providerProfile?.apiKey || settings.apiKey);
       set({
         settings,
         loading: false,

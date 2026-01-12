@@ -155,7 +155,7 @@ export function DomainManager({ customDomains, onChange }: DomainManagerProps) {
       )}
 
       <p className="text-xs text-gray-500">
-        Extension activates on default Daun domains plus your custom domains.
+        Extension activates on default domains plus your custom domains.
       </p>
     </div>
   );
