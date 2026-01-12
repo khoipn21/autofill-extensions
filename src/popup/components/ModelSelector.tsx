@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Check, Code, Plus, Trash2 } from 'lucide-react';
 import { AVAILABLE_MODELS } from '@/shared/constants';
-import type { CustomModel } from '@/shared/types';
+import type { CustomModel, AIProvider } from '@/shared/types';
 
 interface ModelSelectorProps {
   value: string;
   onChange: (modelId: string) => void;
+  provider: AIProvider;
   customModels?: CustomModel[];
   onSaveCustomModel?: (model: CustomModel) => void;
   onDeleteCustomModel?: (modelId: string) => void;
@@ -14,11 +15,16 @@ interface ModelSelectorProps {
 export function ModelSelector({
   value,
   onChange,
+  provider,
   customModels = [],
   onSaveCustomModel,
   onDeleteCustomModel,
 }: ModelSelectorProps) {
-  const isCustomModel = !AVAILABLE_MODELS.some((m) => m.id === value) && !customModels.some((m) => m.id === value);
+  // Filter models by provider
+  const providerModels = AVAILABLE_MODELS.filter((m) => m.provider === provider);
+  const defaultModel = providerModels[0]?.id || '';
+
+  const isCustomModel = !providerModels.some((m) => m.id === value) && !customModels.some((m) => m.id === value);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customValue, setCustomValue] = useState('');
 
@@ -44,8 +50,28 @@ export function ModelSelector({
       onDeleteCustomModel(modelId);
       // If currently selected, switch to default
       if (value === modelId) {
-        onChange(AVAILABLE_MODELS[0].id);
+        onChange(defaultModel);
       }
+    }
+  };
+
+  const getCustomModelHint = () => {
+    switch (provider) {
+      case 'gemini':
+        return 'e.g., gemini-2.5-pro';
+      case 'openrouter':
+      default:
+        return 'e.g., openai/gpt-4o';
+    }
+  };
+
+  const getModelDocsUrl = () => {
+    switch (provider) {
+      case 'gemini':
+        return 'https://ai.google.dev/gemini-api/docs/models/gemini';
+      case 'openrouter':
+      default:
+        return 'https://openrouter.ai/models';
     }
   };
 
@@ -53,8 +79,8 @@ export function ModelSelector({
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">AI Model</label>
       <div className="space-y-2">
-        {/* Built-in models */}
-        {AVAILABLE_MODELS.map((model) => (
+        {/* Built-in models for this provider */}
+        {providerModels.map((model) => (
           <button
             key={model.id}
             onClick={() => {
@@ -137,7 +163,7 @@ export function ModelSelector({
             <Plus className="h-4 w-4 text-gray-500" />
             <div>
               <div className="font-medium text-sm">Add Custom Model</div>
-              <div className="text-xs text-gray-500">Enter any OpenRouter model ID</div>
+              <div className="text-xs text-gray-500">Enter any model ID</div>
             </div>
           </div>
         </button>
@@ -151,7 +177,7 @@ export function ModelSelector({
                 value={customValue}
                 onChange={(e) => setCustomValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCustomSubmit()}
-                placeholder="e.g., openai/gpt-4o"
+                placeholder={getCustomModelHint()}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                 autoFocus
               />
@@ -175,12 +201,12 @@ export function ModelSelector({
             <p className="text-xs text-gray-500">
               Find models at{' '}
               <a
-                href="https://openrouter.ai/models"
+                href={getModelDocsUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                openrouter.ai/models
+                {provider === 'gemini' ? 'Google AI Studio' : 'openrouter.ai/models'}
               </a>
             </p>
           </div>

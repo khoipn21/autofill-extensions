@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Key, Plus, Trash2, Star, Check, AlertCircle, Edit2 } from 'lucide-react';
-import { isValidApiKey } from '@/utils/validators';
-import type { ApiKeyEntry } from '@/shared/types';
+import { isValidApiKeyForProvider } from '@/utils/validators';
+import type { ApiKeyEntry, AIProvider } from '@/shared/types';
+import { PROVIDER_INFO } from '@/shared/constants';
 
 interface ApiKeyManagerProps {
+  provider: AIProvider;
   apiKey: string; // Legacy primary key
   apiKeys: ApiKeyEntry[];
   primaryApiKeyId?: string;
@@ -14,6 +16,7 @@ interface ApiKeyManagerProps {
 }
 
 export function ApiKeyManager({
+  provider,
   apiKey,
   apiKeys,
   primaryApiKeyId,
@@ -32,12 +35,15 @@ export function ApiKeyManager({
   const [editKeyName, setEditKeyName] = useState('');
   const [showEditKey, setShowEditKey] = useState(false);
 
+  const providerInfo = PROVIDER_INFO[provider];
+  const isValidKey = (key: string) => isValidApiKeyForProvider(key, provider);
+
   const toggleShowKey = (id: string) => {
     setShowKeys((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleAddKey = () => {
-    if (!isValidApiKey(newKeyValue)) return;
+    if (!isValidKey(newKeyValue)) return;
 
     const newEntry: ApiKeyEntry = {
       id: `key_${Date.now()}`,
@@ -102,7 +108,7 @@ export function ApiKeyManager({
   };
 
   const handleSaveEdit = () => {
-    if (!editingId || !isValidApiKey(editKeyValue)) return;
+    if (!editingId || !isValidKey(editKeyValue)) return;
 
     const updated = apiKeys.map((k) =>
       k.id === editingId
@@ -205,7 +211,7 @@ export function ApiKeyManager({
                       type={showEditKey ? 'text' : 'password'}
                       value={editKeyValue}
                       onChange={(e) => setEditKeyValue(e.target.value)}
-                      placeholder="sk-or-..."
+                      placeholder={`${providerInfo.keyPrefix}...`}
                       className="w-full px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary"
                     />
                     <button
@@ -220,7 +226,7 @@ export function ApiKeyManager({
                       )}
                     </button>
                   </div>
-                  {editKeyValue && !isValidApiKey(editKeyValue) && (
+                  {editKeyValue && !isValidKey(editKeyValue) && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       Invalid API key format
@@ -230,7 +236,7 @@ export function ApiKeyManager({
                     <button
                       type="button"
                       onClick={handleSaveEdit}
-                      disabled={!isValidApiKey(editKeyValue)}
+                      disabled={!isValidKey(editKeyValue)}
                       className="flex-1 py-1.5 px-3 bg-primary text-white text-sm rounded font-medium disabled:opacity-50 flex items-center justify-center gap-1"
                     >
                       <Check className="h-3 w-3" />
@@ -323,7 +329,7 @@ export function ApiKeyManager({
               type={showNewKey ? 'text' : 'password'}
               value={newKeyValue}
               onChange={(e) => setNewKeyValue(e.target.value)}
-              placeholder="sk-or-..."
+              placeholder={`${providerInfo.keyPrefix}...`}
               className="w-full px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary"
             />
             <button
@@ -338,17 +344,17 @@ export function ApiKeyManager({
               )}
             </button>
           </div>
-          {newKeyValue && !isValidApiKey(newKeyValue) && (
+          {newKeyValue && !isValidKey(newKeyValue) && (
             <p className="text-xs text-red-500 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              Invalid API key format (should start with sk-or-)
+              Invalid API key format (should start with {providerInfo.keyPrefix})
             </p>
           )}
           <div className="flex gap-2">
             <button
               type="button"
               onClick={handleAddKey}
-              disabled={!isValidApiKey(newKeyValue) || loading}
+              disabled={!isValidKey(newKeyValue) || loading}
               className="flex-1 py-1.5 px-3 bg-primary text-white text-sm rounded font-medium disabled:opacity-50 flex items-center justify-center gap-1"
             >
               <Check className="h-3 w-3" />

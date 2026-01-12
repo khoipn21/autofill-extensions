@@ -38,7 +38,7 @@ export function SetupPage() {
       </div>
 
       <div className="border-t pt-4">
-        <ModelSelector value={model} onChange={setModel} />
+        <ModelSelector value={model} onChange={setModel} provider="openrouter" />
       </div>
 
       <p className="text-xs text-gray-400 text-center">

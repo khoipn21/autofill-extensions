@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Save, Trash2, Eye, Globe, Bug, Power, RotateCcw } from 'lucide-react';
+import { ProviderSelector } from '../components/ProviderSelector';
 import { ApiKeyManager } from '../components/ApiKeyManager';
 import { DomainManager } from '../components/DomainManager';
 import { PromptTemplateManager } from '../components/PromptTemplateManager';
 import { ModelSelector } from '../components/ModelSelector';
 import { FieldTypeSelector } from '../components/FieldTypeSelector';
 import { usePopupStore } from '../store';
-import type { FieldType, CustomModel, ApiKeyEntry, PromptTemplate } from '@/shared/types';
-import { DEFAULT_ENABLED_FIELD_TYPES } from '@/shared/constants';
+import type { FieldType, CustomModel, PromptTemplate, AIProvider, ProviderProfile } from '@/shared/types';
+import { DEFAULT_ENABLED_FIELD_TYPES, DEFAULT_PROVIDER_PROFILES } from '@/shared/constants';
 
 export function SettingsPage() {
   const { settings, updateSettings, setPage, loading } = usePopupStore();
 
-  // Existing settings
-  const [apiKey, setApiKey] = useState(settings.apiKey);
-  const [model, setModel] = useState(settings.model);
+  // Provider selection
+  const [activeProvider, setActiveProvider] = useState<AIProvider>(settings.activeProvider || 'openrouter');
+  const [providers, setProviders] = useState(settings.providers || DEFAULT_PROVIDER_PROFILES);
+
+  // Global settings
+  const [enabled, setEnabled] = useState(settings.enabled ?? true);
   const [enabledFieldTypes, setEnabledFieldTypes] = useState<FieldType[]>(
     settings.enabledFieldTypes || DEFAULT_ENABLED_FIELD_TYPES
   );
@@ -25,14 +29,6 @@ export function SettingsPage() {
     settings.targetLanguage ?? 'kr'
   );
   const [debugMode, setDebugMode] = useState(settings.debugMode ?? false);
-  const [customModels, setCustomModels] = useState<CustomModel[]>(settings.customModels ?? []);
-
-  // New settings
-  const [enabled, setEnabled] = useState(settings.enabled ?? true);
-  const [apiKeys, setApiKeys] = useState<ApiKeyEntry[]>(settings.apiKeys ?? []);
-  const [primaryApiKeyId, setPrimaryApiKeyId] = useState<string | undefined>(
-    settings.primaryApiKeyId
-  );
   const [customDomains, setCustomDomains] = useState<string[]>(settings.customDomains ?? []);
   const [maxFillRounds, setMaxFillRounds] = useState(settings.maxFillRounds ?? 3);
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>(
@@ -42,18 +38,36 @@ export function SettingsPage() {
     settings.activePromptTemplateId ?? null
   );
 
+  // Current provider profile (derived from providers state)
+  const currentProfile = useMemo(() => providers[activeProvider], [providers, activeProvider]);
+
+  // Update local state when settings change
+  useEffect(() => {
+    setActiveProvider(settings.activeProvider || 'openrouter');
+    setProviders(settings.providers || DEFAULT_PROVIDER_PROFILES);
+  }, [settings.activeProvider, settings.providers]);
+
+  // Handlers for provider profile updates
+  const updateCurrentProviderProfile = (updates: Partial<ProviderProfile>) => {
+    setProviders((prev) => ({
+      ...prev,
+      [activeProvider]: { ...prev[activeProvider], ...updates },
+    }));
+  };
+
+  const handleProviderChange = (provider: AIProvider) => {
+    setActiveProvider(provider);
+  };
+
   const handleSave = async () => {
     await updateSettings({
-      apiKey,
-      model,
+      activeProvider,
+      providers,
+      enabled,
       enabledFieldTypes,
       enableVisionRecheck,
       targetLanguage,
       debugMode,
-      customModels,
-      enabled,
-      apiKeys,
-      primaryApiKeyId,
       customDomains,
       maxFillRounds,
       promptTemplates,
@@ -63,20 +77,24 @@ export function SettingsPage() {
   };
 
   const handleSaveCustomModel = (newModel: CustomModel) => {
-    const updated = [...customModels, newModel];
-    setCustomModels(updated);
-    updateSettings({ customModels: updated });
+    const updated = [...(currentProfile.customModels || []), newModel];
+    updateCurrentProviderProfile({ customModels: updated });
   };
 
   const handleDeleteCustomModel = (modelId: string) => {
-    const updated = customModels.filter((m) => m.id !== modelId);
-    setCustomModels(updated);
-    updateSettings({ customModels: updated });
+    const updated = (currentProfile.customModels || []).filter((m) => m.id !== modelId);
+    updateCurrentProviderProfile({ customModels: updated });
   };
 
   const handleClear = async () => {
-    if (confirm('Clear API key and reset settings?')) {
-      await updateSettings({ apiKey: '', apiKeys: [], primaryApiKeyId: undefined });
+    if (confirm('Clear all API keys and reset settings?')) {
+      await updateSettings({
+        activeProvider: 'openrouter',
+        providers: DEFAULT_PROVIDER_PROFILES,
+        apiKey: '',
+        apiKeys: [],
+        primaryApiKeyId: undefined,
+      });
       setPage('setup');
     }
   };
@@ -136,28 +154,36 @@ export function SettingsPage() {
           </p>
         </div>
 
-        {/* API Key Manager */}
+        {/* Provider Selector */}
+        <ProviderSelector
+          activeProvider={activeProvider}
+          onProviderChange={handleProviderChange}
+        />
+
+        {/* API Key Manager - Provider Specific */}
         <ApiKeyManager
-          apiKey={apiKey}
-          apiKeys={apiKeys}
-          primaryApiKeyId={primaryApiKeyId}
-          onApiKeyChange={setApiKey}
-          onApiKeysChange={setApiKeys}
-          onPrimaryChange={setPrimaryApiKeyId}
+          provider={activeProvider}
+          apiKey={currentProfile.apiKey}
+          apiKeys={currentProfile.apiKeys || []}
+          primaryApiKeyId={currentProfile.primaryApiKeyId}
+          onApiKeyChange={(key) => updateCurrentProviderProfile({ apiKey: key })}
+          onApiKeysChange={(keys) => updateCurrentProviderProfile({ apiKeys: keys })}
+          onPrimaryChange={(id) => updateCurrentProviderProfile({ primaryApiKeyId: id })}
           loading={loading}
+        />
+
+        {/* Model Selector - Provider Specific */}
+        <ModelSelector
+          value={currentProfile.model}
+          onChange={(model) => updateCurrentProviderProfile({ model })}
+          provider={activeProvider}
+          customModels={currentProfile.customModels || []}
+          onSaveCustomModel={handleSaveCustomModel}
+          onDeleteCustomModel={handleDeleteCustomModel}
         />
 
         {/* Domain Manager */}
         <DomainManager customDomains={customDomains} onChange={setCustomDomains} />
-
-        {/* Model Selector */}
-        <ModelSelector
-          value={model}
-          onChange={setModel}
-          customModels={customModels}
-          onSaveCustomModel={handleSaveCustomModel}
-          onDeleteCustomModel={handleDeleteCustomModel}
-        />
 
         {/* Field Type Selector */}
         <FieldTypeSelector value={enabledFieldTypes} onChange={setEnabledFieldTypes} />

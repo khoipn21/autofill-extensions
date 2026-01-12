@@ -198,7 +198,11 @@ export function MainPage() {
       </div>
 
       <div className="text-xs text-gray-400 text-center">
-        Model: {settings.model.split('/')[1]}
+        {settings.activeProvider === 'gemini' ? (
+          <>Provider: Gemini | Model: {settings.providers?.gemini?.model || 'gemini-2.5-flash'}</>
+        ) : (
+          <>Provider: OpenRouter | Model: {(settings.model || '').split('/').pop()}</>
+        )}
       </div>
     </div>
   );
