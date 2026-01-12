@@ -18,7 +18,7 @@ const PROVIDER_ICONS: Record<AIProvider, React.ReactNode> = {
 export function ProviderSelector({ activeProvider, onProviderChange }: ProviderSelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-gray-300">
+      <label className="block text-sm font-medium text-gray-700">
         AI Provider
       </label>
       <div className="grid grid-cols-2 gap-3">
@@ -32,25 +32,25 @@ export function ProviderSelector({ activeProvider, onProviderChange }: ProviderS
               type="button"
               onClick={() => onProviderChange(provider)}
               className={`
-                relative p-4 rounded-lg border-2 transition-all text-left
+                relative p-3 rounded-lg border-2 transition-all text-left
                 ${isActive
-                  ? 'border-purple-500 bg-purple-500/10'
-                  : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                 }
               `}
             >
               {isActive && (
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-purple-500" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
               )}
-              <div className="flex items-center gap-2 mb-2">
-                <span className={isActive ? 'text-purple-400' : 'text-gray-400'}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={isActive ? 'text-primary' : 'text-gray-500'}>
                   {PROVIDER_ICONS[provider]}
                 </span>
-                <span className={`font-medium ${isActive ? 'text-white' : 'text-gray-200'}`}>
+                <span className={`font-medium text-sm ${isActive ? 'text-gray-900' : 'text-gray-700'}`}>
                   {info.name}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 line-clamp-2">
+              <p className="text-xs text-gray-500 line-clamp-2">
                 {info.description}
               </p>
             </button>

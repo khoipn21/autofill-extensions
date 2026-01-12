@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Key, Check, AlertCircle } from 'lucide-react';
-import { isValidApiKey } from '@/utils/validators';
+import { isValidApiKeyForProvider } from '@/utils/validators';
+import { PROVIDER_INFO } from '@/shared/constants';
+import type { AIProvider } from '@/shared/types';
 
 interface ApiKeyInputProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
   loading?: boolean;
+  provider?: AIProvider;
 }
 
-export function ApiKeyInput({ value, onChange, onSubmit, loading }: ApiKeyInputProps) {
+export function ApiKeyInput({ value, onChange, onSubmit, loading, provider = 'openrouter' }: ApiKeyInputProps) {
   const [showKey, setShowKey] = useState(false);
-  const isValid = isValidApiKey(value);
+  const isValid = isValidApiKeyForProvider(value, provider);
+  const providerInfo = PROVIDER_INFO[provider];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +25,6 @@ export function ApiKeyInput({ value, onChange, onSubmit, loading }: ApiKeyInputP
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          OpenRouter API Key
-        </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Key className="h-4 w-4 text-gray-400" />
@@ -32,7 +33,7 @@ export function ApiKeyInput({ value, onChange, onSubmit, loading }: ApiKeyInputP
             type={showKey ? 'text' : 'password'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="sk-or-..."
+            placeholder={`${providerInfo.keyPrefix}...`}
             className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             disabled={loading}
           />
@@ -51,7 +52,7 @@ export function ApiKeyInput({ value, onChange, onSubmit, loading }: ApiKeyInputP
         {value && !isValid && (
           <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
             <AlertCircle className="h-3 w-3" />
-            Invalid API key format
+            Invalid API key format (should start with {providerInfo.keyPrefix})
           </p>
         )}
       </div>
@@ -69,7 +70,7 @@ export function ApiKeyInput({ value, onChange, onSubmit, loading }: ApiKeyInputP
         ) : (
           <>
             <Check className="h-4 w-4" />
-            Save API Key
+            Save & Continue
           </>
         )}
       </button>
