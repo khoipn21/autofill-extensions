@@ -33,7 +33,7 @@ export async function fillPopupField(
     }
 
     // 3. Search for and select the value in the modal
-    const success = await selectValueInModal(modal, value, field);
+    const success = await selectValueInModal(modal, value);
 
     // 4. Confirm selection if needed
     if (success) {
@@ -94,8 +94,7 @@ async function findOpenModal(): Promise<HTMLElement | null> {
  */
 async function selectValueInModal(
   modal: HTMLElement,
-  value: string,
-  _field?: DetectedField
+  value: string
 ): Promise<boolean> {
   // Check for category modal (hierarchical tree selection)
   if (isCategoryModal(modal)) {

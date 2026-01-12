@@ -583,6 +583,7 @@ function parseAIResponse(response: OpenRouterResponse): AIFillResult {
     jsonStr = jsonStr
       .replace(/,\s*}/g, '}') // Remove trailing commas
       .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
+      // eslint-disable-next-line no-control-regex
       .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters
 
     const result = JSON.parse(jsonStr);
