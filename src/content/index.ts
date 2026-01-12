@@ -346,7 +346,7 @@ function handleChangeLanguage(payload: { language: 'kr' | 'en' }): ExtensionResp
     // Set language in localStorage for persistence
     localStorage.setItem('language', language);
 
-    // Call i18next directly via window object (Daun Admin exposes it)
+    // Call i18next directly via window object (some apps expose it)
     // Inject script to access React app's i18n instance
     const script = document.createElement('script');
     script.textContent = `
@@ -361,7 +361,7 @@ function handleChangeLanguage(payload: { language: 'kr' | 'en' }): ExtensionResp
         if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
           const hook = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
           // Dispatch custom event that app can listen to
-          window.dispatchEvent(new CustomEvent('daun-language-change', { detail: { language: '${language}' } }));
+          window.dispatchEvent(new CustomEvent('language-change', { detail: { language: '${language}' } }));
         }
 
         // Fallback: dispatch storage event to trigger re-render

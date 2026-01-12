@@ -1,7 +1,7 @@
 import type { ExtensionSettings, AIProvider, ProviderProfile } from './types';
 import { DEFAULT_SETTINGS, AVAILABLE_MODELS, DEFAULT_PROVIDER_PROFILES, DEFAULT_OPENROUTER_MODEL, DEFAULT_GEMINI_MODEL } from './constants';
 
-const STORAGE_KEY = 'daun_autofill_settings';
+const STORAGE_KEY = 'ai_autofill_settings';
 
 /**
  * Check if a model ID is valid for a specific provider
@@ -92,7 +92,7 @@ export async function getSettings(): Promise<ExtensionSettings> {
     for (const provider of ['openrouter', 'gemini'] as AIProvider[]) {
       const profile = settings.providers[provider];
       if (profile.model && !isValidModel(profile.model, provider, profile.customModels)) {
-        console.warn(`[Daun AutoFill] Invalid ${provider} model "${profile.model}", resetting to default`);
+        console.warn(`[AI AutoFill] Invalid ${provider} model "${profile.model}", resetting to default`);
         profile.model = provider === 'openrouter' ? DEFAULT_OPENROUTER_MODEL : DEFAULT_GEMINI_MODEL;
       }
     }
@@ -107,7 +107,7 @@ export async function getSettings(): Promise<ExtensionSettings> {
 
     return settings;
   } catch (error) {
-    console.error('[Daun AutoFill] Failed to get settings:', error);
+    console.error('[AI AutoFill] Failed to get settings:', error);
     return { ...DEFAULT_SETTINGS };
   }
 }
@@ -139,7 +139,7 @@ export async function saveSettings(updates: Partial<ExtensionSettings>): Promise
 
     await chrome.storage.local.set({ [STORAGE_KEY]: newSettings });
   } catch (error) {
-    console.error('[Daun AutoFill] Failed to save settings:', error);
+    console.error('[AI AutoFill] Failed to save settings:', error);
     throw error;
   }
 }

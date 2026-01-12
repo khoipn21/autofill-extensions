@@ -64,9 +64,9 @@ export function isAllowedUrl(
 }
 
 /**
- * Check if URL is a Daun Admin page (backward compatible)
+ * Check if URL is valid (backward compatible)
  * @deprecated Use isAllowedUrl with settings instead
  */
-export function isDaunAdminUrl(url: string): boolean {
+export function isValidUrl(url: string): boolean {
   return isAllowedUrl(url, [], true);
 }

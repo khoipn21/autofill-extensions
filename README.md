@@ -1,24 +1,25 @@
-# Daun Auto-Fill Extension
+# AI Auto-Fill Extension
 
-AI-powered form auto-fill Chrome extension for Daun Admin using OpenRouter AI vision models.
+AI-powered form auto-fill Chrome extension using OpenRouter and Gemini AI vision models.
 
 **Version:** 1.0.0
-**License:** Private - Daun Internal Use Only
+**License:** MIT
 **Platform:** Chrome/Chromium (Manifest V3)
 
 ## Overview
 
-Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-powered field analysis. Designed for QA testing and development workflows, it analyzes form screenshots and DOM structure to generate realistic test data.
+AI Auto-Fill Extension automates form filling on any website using AI-powered field analysis. It analyzes form screenshots and DOM structure to generate realistic test data.
 
 ### Key Features
 
-- **AI-Powered Analysis**: Uses OpenRouter vision models (Gemini 2.0 Flash, GPT-4o Mini) to understand form context
+- **AI-Powered Analysis**: Uses OpenRouter vision models (Gemini 2.0 Flash, GPT-4o Mini) or direct Gemini API
+- **Multi-Provider Support**: Switch between OpenRouter and Google Gemini (AI Studio)
 - **Mantine Component Support**: Detects TextInput, Select, Checkbox, DatePicker, RichText, and more
 - **Multi-Round Filling**: Retries unfilled fields up to 3 rounds with optional vision-based verification
 - **Smart Field Detection**: Extracts labels from aria-label, associated labels, placeholders, and React props
-- **Customizable**: Multi-API keys, custom prompts, domain whitelist, field type toggles
+- **Customizable**: Multi-API keys, custom prompts, field type toggles
 - **Developer-Friendly**: Keyboard shortcuts (Alt+F), debug mode with streaming AI output, visual feedback
-- **Realistic Data**: Generates Korean business names, addresses, phone numbers matching Daun's domain
+- **Works Everywhere**: Extension works on all websites when enabled
 
 ## Quick Start
 
@@ -27,8 +28,8 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/khoipn21/autofill-extensions.git
-   cd daun-autofill-extension
+   git clone https://github.com/khoipn21/ai-autofill-extension.git
+   cd ai-autofill-extension
    ```
 
 2. **Install dependencies**
@@ -52,17 +53,20 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 ### First-Time Setup
 
 1. Click the extension icon in Chrome toolbar
-2. Enter your OpenRouter API key ([get one free](https://openrouter.ai/keys))
-3. Click "Test Connection" to verify
-4. Select your preferred AI model (default: Gemini 2.0 Flash Free)
-5. Navigate to any Daun Admin form
-6. Click the purple "✨ Auto-Fill" button or press `Alt+F`
+2. Choose your AI provider (OpenRouter or Gemini)
+3. Enter your API key:
+   - OpenRouter: [get one free](https://openrouter.ai/keys)
+   - Gemini: [get from AI Studio](https://aistudio.google.com/apikey)
+4. Click "Test Connection" to verify
+5. Select your preferred AI model
+6. Navigate to any form page
+7. Click the blue "✨ Auto-Fill" button or press `Alt+F`
 
 ## Usage
 
 ### Basic Auto-Fill
 
-1. **Navigate** to any Daun Admin form page
+1. **Navigate** to any form page
 2. **Trigger** auto-fill:
    - Click the floating "✨ Auto-Fill" button (bottom-right), OR
    - Press `Alt+F` keyboard shortcut
@@ -72,9 +76,15 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 
 ### Advanced Features
 
+#### Multi-Provider Support
+
+- **Settings → Provider** - Switch between OpenRouter and Gemini
+- OpenRouter: Access multiple models (Gemini, GPT-4o, Claude) via one API
+- Gemini: Direct access to Google's Gemini models with free tier
+
 #### Multi-API Key Support
 
-- **Settings → API Keys** - Add multiple OpenRouter API keys
+- **Settings → API Keys** - Add multiple API keys per provider
 - Automatic fallback on rate limits (429 errors)
 - Set primary key for default usage
 
@@ -102,12 +112,6 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 - Real-time display of AI prompt and response
 - Useful for troubleshooting fill failures
 
-#### Custom Domains
-
-- **Settings → Custom Domains** - Add additional whitelisted domains
-- Example: Add `daun-demo.kr` for demo environments
-- Default domains: localhost, 127.0.0.1, daun.kr, daun-dev.kr, daun-stg.kr, admin.daun.kr, etc.
-
 ## Supported Field Types
 
 | Type         | Components                 | Fill Method                   | Notes                    |
@@ -120,7 +124,7 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 | **Radio**    | Radio                      | Select option                 | Single choice from group |
 | **Switch**   | Switch                     | Toggle on/off                 | Boolean values           |
 | **RichText** | TipTap, Quill, ProseMirror | Insert HTML/text              | Supports formatting      |
-| **Dynamic**  | Repeatable fields          | Add rows + fill               | Marketplace attributes   |
+| **Dynamic**  | Repeatable fields          | Add rows + fill               | Dynamic form fields      |
 | **Popup**    | Category selectors         | Click trigger → navigate tree | Modal-based fields       |
 | **File**     | FileInput                  | ⚠️ Skipped                    | Not supported            |
 
@@ -132,19 +136,19 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 
 | Section              | Options                                            | Description                         |
 | -------------------- | -------------------------------------------------- | ----------------------------------- |
+| **Provider**         | OpenRouter / Gemini                                | Choose AI provider                  |
 | **API Keys**         | Add/Remove/Test keys, Set primary                  | Multi-key support with fallback     |
 | **Model Selection**  | Preset models, Custom model ID                     | Choose AI model or add custom       |
 | **Field Types**      | Toggle checkboxes                                  | Enable/disable specific field types |
 | **Advanced**         | Vision Recheck, Max Fill Rounds (1-10), Debug Mode | Fine-tune auto-fill behavior        |
-| **Custom Domains**   | Add/Remove domains                                 | Extend whitelist beyond defaults    |
+| **Custom Domains**   | Add/Remove domains                                 | Additional domains (optional)       |
 | **Prompt Templates** | Create/Edit/Activate templates                     | Customize AI prompt                 |
-| **Language**         | Korean/English toggle                              | STG environment only                |
 
 ### Default Settings
 
 ```typescript
 {
-  apiKey: '',                              // Required on first use
+  activeProvider: 'openrouter',           // Default provider
   model: 'google/gemini-2.0-flash-exp:free', // Free tier model
   enabled: true,                           // Global enable
   enabledFieldTypes: ['text', 'number', 'date', 'select', ...], // All types
@@ -169,6 +173,7 @@ Daun Auto-Fill Extension automates form filling on Daun Admin pages using AI-pow
 |               | Zustand            | 5.x     | State management    |
 |               | Lucide React       | 0.5.x   | Icons               |
 | **AI**        | OpenRouter API     | -       | Multi-model gateway |
+|               | Gemini API         | -       | Google AI direct    |
 | **Extension** | Chrome Manifest V3 | -       | Extension platform  |
 
 ### Project Structure
@@ -267,7 +272,7 @@ Analyze DOM fields (labels, types, selectors)
   ↓
 Capture screenshot (visible tab)
   ↓
-Send to OpenRouter AI (screenshot + field metadata)
+Send to AI (screenshot + field metadata)
   ↓
 Parse JSON response (field ID → value mapping)
   ↓
@@ -291,17 +296,14 @@ Show success/failure toast
 
 **Host Permissions:**
 
-- `*://*.daun.kr/*`
-- `*://*.axndx.org/*`
-- `*://localhost:*/*`
-- `*://127.0.0.1:*/*`
+- `<all_urls>` - Works on all websites
 
 ## Security & Privacy
 
 ### Data Handling
 
 - **API Keys**: Stored in `chrome.storage.local` (encrypted by browser), never logged
-- **Screenshots**: Captured on-demand, sent to OpenRouter via HTTPS, not persisted
+- **Screenshots**: Captured on-demand, sent to AI provider via HTTPS, not persisted
 - **Form Data**: Only metadata (labels, types) sent to AI, no storage beyond session
 - **Analytics**: None (no third-party tracking)
 
@@ -317,7 +319,6 @@ Show success/failure toast
 
 **Possible Causes:**
 
-- URL not in whitelist → Check console: "URL not in allowed domains"
 - Extension disabled → Open popup, check "Enabled" toggle
 - Content script not injected → Check Chrome DevTools > Sources > Content Scripts
 
@@ -326,7 +327,7 @@ Show success/failure toast
 **Possible Causes:**
 
 - AI returned invalid JSON → Enable debug mode, check raw response
-- Selector changed (Mantine update) → Re-run auto-fill, check console logs
+- Selector changed → Re-run auto-fill, check console logs
 - Element disabled/readonly → Check fill method classification
 
 **Debug Steps:**
@@ -343,7 +344,7 @@ Show success/failure toast
 **Possible Causes:**
 
 - Invalid API key → Test connection in popup
-- OpenRouter downtime → Check https://status.openrouter.ai
+- Provider downtime → Check provider status page
 - Rate limit exceeded → Add alternative API key in settings
 - Network firewall → Check browser console for CORS errors
 
@@ -352,7 +353,6 @@ Show success/failure toast
 ### Current Constraints
 
 - **Chrome Only**: Manifest V3 (no Firefox/Safari yet)
-- **Mantine-Specific**: DOM selectors tuned for Mantine components
 - **Single Tab**: Only works on active tab (not background tabs)
 - **Vision Models**: Non-vision models can't analyze screenshots
 - **File Uploads**: Not supported (always skipped)
@@ -360,32 +360,20 @@ Show success/failure toast
 ### Known Issues
 
 - Deeply nested popups may fail to detect
-- Custom React components (non-Mantine) may not be detected
+- Custom React components may not be detected
 - Dynamic form updates after page load may be missed
-
-## Roadmap
-
-### Completed (v1.0.0)
-
-- ✅ AI-powered form analysis with vision models
-- ✅ Mantine component detection (10+ types)
-- ✅ Multi-round retry logic with vision recheck
-- ✅ Multi-API key support with fallback
-- ✅ Custom prompt templates
-- ✅ Debug mode with streaming output
-
 
 ## Contributing
 
 For feature requests or bug reports, contact:
 
-- GitHub Issues: https://github.com/khoipn21/autofill-extensions/issues
+- GitHub Issues: https://github.com/khoipn21/ai-autofill-extension/issues
 
 ## License
 
-KhoiPN21
+MIT License
 
 **Copyright © 2026 KhoiPN21. All rights reserved.**
 
 **Last Updated:** 2026-01-12
-**Version:** 1.0.2
+**Version:** 1.0.0

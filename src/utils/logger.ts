@@ -6,15 +6,15 @@ const isDev = import.meta.env.DEV;
 export const logger = {
   log: (...args: unknown[]) => {
     if (isDev) {
-      console.log('[Daun AutoFill]', ...maskSensitiveData(args));
+      console.log('[AI AutoFill]', ...maskSensitiveData(args));
     }
   },
   error: (...args: unknown[]) => {
-    console.error('[Daun AutoFill Error]', ...maskSensitiveData(args));
+    console.error('[AI AutoFill Error]', ...maskSensitiveData(args));
   },
   warn: (...args: unknown[]) => {
     if (isDev) {
-      console.warn('[Daun AutoFill]', ...maskSensitiveData(args));
+      console.warn('[AI AutoFill]', ...maskSensitiveData(args));
     }
   },
 };

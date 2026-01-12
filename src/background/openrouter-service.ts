@@ -378,8 +378,8 @@ async function callOpenRouter(request: OpenRouterRequest, apiKey: string, signal
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://daun.kr',
-      'X-Title': 'Daun Auto-Fill Extension',
+      'HTTP-Referer': 'https://github.com/khoipn21/ai-autofill-extension',
+      'X-Title': 'AI Auto-Fill Extension',
     },
     body: JSON.stringify(request),
     signal,
@@ -439,8 +439,8 @@ async function callOpenRouterStreaming(
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://daun.kr',
-      'X-Title': 'Daun Auto-Fill Extension',
+      'HTTP-Referer': 'https://github.com/khoipn21/ai-autofill-extension',
+      'X-Title': 'AI Auto-Fill Extension',
     },
     body: JSON.stringify(request),
     signal,

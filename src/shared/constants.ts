@@ -186,14 +186,6 @@ export const DEFAULT_SETTINGS = {
 export const DEFAULT_ALLOWED_DOMAINS = [
   'localhost',
   '127.0.0.1',
-  'daun.kr',
-  'daun-dev.kr',
-  'daun-stg.kr',
-  'admin.daun.kr',
-  'stg.daun.kr',
-  'dev.daun.kr',
-  'daun-cms.axndx.org',
-  'daun.axndx.org',
 ];
 
 // Default system prompt (displayed in settings, actual prompt is in ai-service.ts)

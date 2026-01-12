@@ -3,7 +3,7 @@ import { Wand2, Settings, RefreshCw, CheckCircle, AlertTriangle, Bug, Eye, XCirc
 import { StatusIndicator } from '../components/StatusIndicator';
 import { usePopupStore } from '../store';
 import { sendToContent, sendToBackground } from '@/shared/messages';
-import { isDaunAdminUrl } from '@/utils/validators';
+import { isValidUrl } from '@/utils/validators';
 
 type FillStatus = 'ready' | 'analyzing' | 'processing' | 'filling' | 'complete' | 'error';
 
@@ -41,15 +41,15 @@ export function MainPage() {
     setStats(null);
 
     try {
-      // Validate active tab is a Daun Admin page before sending messages
+      // Validate active tab URL before sending messages
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url) {
         throw new Error('No active tab found');
       }
 
-      if (!isDaunAdminUrl(tab.url)) {
+      if (!isValidUrl(tab.url)) {
         setStatus('error');
-        setMessage('Please open a Daun Admin page to use auto-fill');
+        setMessage('Please open a webpage to use auto-fill');
         return;
       }
 
@@ -105,7 +105,7 @@ export function MainPage() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">Daun Auto-Fill</h1>
+        <h1 className="text-lg font-bold text-gray-900">AI Auto-Fill</h1>
         <button
           onClick={() => setPage('settings')}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

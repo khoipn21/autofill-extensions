@@ -33,14 +33,14 @@ jobs:
       - name: Create extension zip
         run: |
           cd dist
-          zip -r ../daun-autofill-extension.zip .
+          zip -r ../ai-autofill-extension.zip .
           cd ..
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: extension-build
-          path: daun-autofill-extension.zip
+          path: ai-autofill-extension.zip
           retention-days: 30
 
   release:
@@ -66,16 +66,16 @@ jobs:
         with:
           name: Release ${{ steps.version.outputs.VERSION }}
           body: |
-            ## Daun Auto-Fill Extension ${{ steps.version.outputs.VERSION }}
+            ## AI Auto-Fill Extension ${{ steps.version.outputs.VERSION }}
 
             ### Installation
-            1. Download `daun-autofill-extension.zip`
+            1. Download `ai-autofill-extension.zip`
             2. Extract to a folder
             3. Open Chrome → Extensions → Enable Developer mode
             4. Click "Load unpacked" → Select the extracted folder
 
             ### Changes
             See commit history for changes in this release.
-          files: daun-autofill-extension.zip
+          files: ai-autofill-extension.zip
           draft: false
           prerelease: false

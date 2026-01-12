@@ -21,9 +21,9 @@ export function SetupPage() {
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 mb-3">
           <Sparkles className="h-6 w-6 text-primary" />
         </div>
-        <h1 className="text-xl font-bold text-gray-900">Daun Auto-Fill</h1>
+        <h1 className="text-xl font-bold text-gray-900">AI Auto-Fill</h1>
         <p className="text-sm text-gray-500 mt-1">
-          AI-powered form auto-fill for Daun Admin
+          AI-powered form auto-fill extension
         </p>
       </div>
 
