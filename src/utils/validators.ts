@@ -1,5 +1,3 @@
-import { DEFAULT_ALLOWED_DOMAINS } from '@/shared/constants';
-
 /**
  * Validate OpenRouter API key format
  */
@@ -9,14 +7,15 @@ export function isValidApiKey(key: string): boolean {
 }
 
 /**
- * Check if URL is allowed based on default domains and custom domains
+ * Check if URL is allowed
+ * Now allows all domains when extension is enabled
  * @param url The URL to check
- * @param customDomains Additional user-configured domains
+ * @param _customDomains Deprecated - kept for API compatibility
  * @param extensionEnabled Whether the extension is globally enabled
  */
 export function isAllowedUrl(
   url: string,
-  customDomains: string[] = [],
+  _customDomains?: string[],
   extensionEnabled: boolean = true
 ): boolean {
   // If extension is disabled globally, return false
@@ -25,25 +24,9 @@ export function isAllowedUrl(
   }
 
   try {
-    const parsed = new URL(url);
-    const hostname = parsed.hostname.toLowerCase();
-
-    // Check default domains
-    for (const domain of DEFAULT_ALLOWED_DOMAINS) {
-      if (hostname === domain || hostname.endsWith(`.${domain}`)) {
-        return true;
-      }
-    }
-
-    // Check custom domains
-    for (const domain of customDomains) {
-      const normalizedDomain = domain.toLowerCase().trim();
-      if (normalizedDomain && (hostname === normalizedDomain || hostname.endsWith(`.${normalizedDomain}`))) {
-        return true;
-      }
-    }
-
-    return false;
+    // Just validate that it's a proper URL
+    new URL(url);
+    return true;
   } catch {
     return false;
   }
