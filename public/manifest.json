@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Daun Auto-Fill",
+  "version": "1.0.0",
+  "description": "AI-powered form auto-fill for Daun Admin",
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "*://*.daun.kr/*",
+    "*://*.axndx.org/*",
+    "*://localhost:*/*",
+    "*://127.0.0.1:*/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.daun.kr/*",
+        "*://*.axndx.org/*",
+        "*://localhost:*/*",
+        "*://127.0.0.1:*/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

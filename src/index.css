@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+:root {
+  --primary: #228be6;
+}
+
+body {
+  width: 360px;
+  min-height: 400px;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #ffffff;
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.focus\:ring-primary:focus {
+  --tw-ring-color: var(--primary);
+}
