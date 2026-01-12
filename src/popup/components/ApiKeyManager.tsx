@@ -47,7 +47,7 @@ export function ApiKeyManager({
     };
 
     // If there's a legacy apiKey and no apiKeys yet, migrate it first
-    let updatedKeys = [...apiKeys];
+    const updatedKeys = [...apiKeys];
     if (apiKey && apiKeys.length === 0) {
       const legacyEntry: ApiKeyEntry = {
         id: `key_legacy_${Date.now() - 1}`,

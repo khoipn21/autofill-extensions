@@ -501,7 +501,7 @@ async function callOpenRouterStreaming(
             fullContent += content;
             onStream(content, fullContent);
           }
-        } catch (e) {
+        } catch {
           // Skip malformed chunks
           logger.warn('Failed to parse SSE chunk:', data);
         }
@@ -583,7 +583,7 @@ function parseAIResponse(response: OpenRouterResponse): AIFillResult {
     jsonStr = jsonStr
       .replace(/,\s*}/g, '}') // Remove trailing commas
       .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
-      .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+      .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters
 
     const result = JSON.parse(jsonStr);
 

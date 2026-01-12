@@ -95,7 +95,7 @@ async function findOpenModal(): Promise<HTMLElement | null> {
 async function selectValueInModal(
   modal: HTMLElement,
   value: string,
-  _field: DetectedField
+  _field?: DetectedField
 ): Promise<boolean> {
   // Check for category modal (hierarchical tree selection)
   if (isCategoryModal(modal)) {
